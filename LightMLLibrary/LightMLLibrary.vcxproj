@@ -10,6 +10,26 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="BatchNorm2D.cu" />
+    <CudaCompile Include="Conv2D.cu" />
+    <CudaCompile Include="GeLU.cu" />
+    <CudaCompile Include="Linear.cu" />
+    <CudaCompile Include="Module.cu" />
+    <CudaCompile Include="ReLU.cu" />
+    <CudaCompile Include="SoftMax.cu" />
+    <CudaCompile Include="Tensor.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="BatchNorm2D.hpp" />
+    <ClInclude Include="Conv2d.hpp" />
+    <ClInclude Include="GeLU.hpp" />
+    <ClInclude Include="Linear.hpp" />
+    <ClInclude Include="Module.hpp" />
+    <ClInclude Include="ReLU.hpp" />
+    <ClInclude Include="SoftMax.hpp" />
+    <ClInclude Include="Tensor.hpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3DE6DC78-E7EF-14A5-955B-AF57E26B428A}</ProjectGuid>
     <RootNamespace>LightMLLibrary</RootNamespace>
