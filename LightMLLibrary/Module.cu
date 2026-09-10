@@ -2,10 +2,33 @@
 #include "Module.hpp"
 #include "Tensor.cu"
 
-Tensor Module::forward(Tensor input) {
-	// Implement the forward pass using the weights and bias
+class Module {
+
+protected:
+	bool training;
+	void eval() {
+		training = false;
+	}
+	void train() {
+		training = true;
+	}
+public:
+	Module() {
+
+	}
+	virtual ~Module() {
+
+	}
+	virtual void forward(Tensor input);
+	virtual void backward(Tensor input, Tensor gradOutput);
+	virtual vector<Tensor*> parameters();
+
+};
+
+void Module::forward(Tensor input) {
+	// Implement the forward pass for the module
 	// This is a placeholder implementation
-	return Tensor();
+	return;
 }
 
 void Module::backward(Tensor input, Tensor gradOutput) {
@@ -20,3 +43,5 @@ vector<Tensor*> Module::parameters() {
 	// This is a placeholder implementation
 	return vector<Tensor*>();
 }
+
+

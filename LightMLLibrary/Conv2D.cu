@@ -129,6 +129,11 @@ float* Conv2D::getWeights() {
 	return weights.getData();
 }
 
+float* Conv2D::setWeights(float* newWeights) {
+	cudaMemcpy(weights.getData(), newWeights, weights.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	return weights.getData();
+}
+
 float* Conv2D::getBias() {
 	return bias.getData();
 }

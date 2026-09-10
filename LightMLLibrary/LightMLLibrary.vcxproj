@@ -30,6 +30,9 @@
     <ClInclude Include="SoftMax.hpp" />
     <ClInclude Include="Tensor.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cu" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{3DE6DC78-E7EF-14A5-955B-AF57E26B428A}</ProjectGuid>
     <RootNamespace>LightMLLibrary</RootNamespace>

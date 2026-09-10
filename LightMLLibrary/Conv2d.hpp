@@ -20,9 +20,12 @@ private:
 
 	//No dilation used as Loukka does not use it, but it can be added later if needed
 	Tensor bias;
+
+protected:
+	Tensor weights;
+
 public:
 
-	Tensor weights;
 	Conv2D(int in_channels, int out_channels, int kernel_size, int stride, int padding);
 	
 
@@ -33,6 +36,9 @@ public:
 		// et initialisés à 0 (important pour les atomicAdd)
 
 	float* getWeights();
+
+	float* setWeights(float* newWeights);
+	float* setWeights(int* pos, float newWeight);
 
 	float* getBias();
 

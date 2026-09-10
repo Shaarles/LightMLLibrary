@@ -39,13 +39,7 @@ public:
 
 	~Tensor();
 		//destructor to free memory
-	static bool canMultiply(Tensor a, Tensor b);
-
-
-
-	static Tensor add(float* a, float* b, int n);
-
-
+	static bool canMultiply(Tensor* a, Tensor* b);
 
 	void toString();
 
@@ -84,3 +78,8 @@ public:
 
 	*/
 };
+
+bool canMultiply(Tensor* a, Tensor* b) {
+	
+	return true;
+}

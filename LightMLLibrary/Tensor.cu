@@ -17,6 +17,15 @@ __global__ void one_kernel(float* data, int size) {
 	}
 }
 
+__global__ void add(float*a, float*b, float* results, int size) {
+	int idx = blockIdx.x * blockDim.x + threadIdx.x;
+	if (idx < size) {
+		results[idx] = a[idx] + b[idx];
+	}
+}
+
+
+
 Tensor::Tensor(int dimensions[], int ndim) {
 	//Constructor for nD tensors, the random initialization is only for weights and bias but I implemented it here for simplicity
 
@@ -137,27 +146,11 @@ Tensor::~Tensor() {
 	cudaFreeHost(data);
 	cudaFree(dev_data);
 }
-bool Tensor::canMultiply(Tensor a, Tensor b) {
-	return a.getDimensions()[a.getNdim() - 1] == b.getDimensions()[0];
+bool Tensor::canMultiply(Tensor* a, Tensor* b) {
+	return a->getDimensions()[a->getNdim() - 1] == b->getDimensions()[0];
 }
 
 
-
-Tensor Tensor::add(float* a, float* b, int n) {
-	//Assuming it's 1D+1D (a+b)
-	float* resultData=nullptr;
-	cudaError_t err = cudaMallocHost(&resultData, n * sizeof(float));
-	if (err != cudaSuccess) {
-		std::cerr << "cudaMallocHost failed: " << cudaGetErrorString(err) << std::endl;
-		resultData = nullptr;
-	}
-	for (int i = 0; i < n; i++) {
-		resultData[i] = a[i] + b[i];
-	}
-	Tensor result(resultData, n);
-	cudaFreeHost(resultData);
-	return result;
-}
 
 	
 
@@ -166,6 +159,11 @@ void Tensor::toString() {
 	for (int i = 0; i < getNdim(); i++) {
 		printf("Dimension %d: %d\n", i, getDimensions()[i]);
 	}
+	printf("(");
+	for (int i = 0; i < (this->nbEle)-1; i++) {
+		printf("%f,", this->data[i]);
+	}
+	printf("%f)", this->data[this->nbEle - 1]);
 }
 
 Tensor Tensor::copy() {
@@ -256,3 +254,39 @@ int* Tensor::getStrides() const {
 	return strides;
 }
 
+void add(const Tensor& a, const Tensor& b, const Tensor& result) {
+
+	cudaError_t err = cudaMemcpy(a.getDevData(), a.getData(), a.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
+	}
+
+	err = cudaMemcpy(b.getDevData(), b.getData(), b.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
+	}
+	
+	err = cudaMemcpy(result.getDevData(), result.getData(), result.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
+	}
+
+
+	add << <(result.getnbEle() + 255) / 256, 256 >> > (a.getDevData(), b.getDevData(), result.getDevData(), result.getnbEle());
+
+
+	err = cudaMemcpy(a.getData(), a.getDevData(), a.getnbEle() * sizeof(float), cudaMemcpyDeviceToHost);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for device to host copy: " << cudaGetErrorString(err) << std::endl;
+	}
+
+	err = cudaMemcpy(b.getData(), b.getDevData(), b.getnbEle() * sizeof(float), cudaMemcpyDeviceToHost);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for device to host copy: " << cudaGetErrorString(err) << std::endl;
+	}
+
+	err = cudaMemcpy(result.getData(), result.getDevData(), result.getnbEle() * sizeof(float), cudaMemcpyDeviceToHost);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for device to host copy: " << cudaGetErrorString(err) << std::endl;
+	}
+}
