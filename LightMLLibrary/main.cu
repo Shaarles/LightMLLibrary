@@ -19,5 +19,6 @@ int main() {
 
 	output.toString(); // Print the output tensor
 	conv.getWeights(); // Get the weights of the convolutional layer
+
 	return 0;
 }

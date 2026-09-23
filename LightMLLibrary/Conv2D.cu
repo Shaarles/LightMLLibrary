@@ -86,7 +86,12 @@ __global__ void conv2d_backward(float* input, float* gradOutput, float* weights,
 	
 }
 
+__global__ void atomicSet(float* array, int index, float value) {
+	int pos = blockIdx.x * blockDim.x + threadIdx.x;
+	if(index==pos)
+	atomicExch(&array[index], value);
 
+}
 
 Conv2D::Conv2D(int in_channels, int out_channels, int kernel_size, int stride, int padding) :
 	in_channels(in_channels), out_channels(out_channels), kernel_size(new int[2] {kernel_size, kernel_size}),
@@ -149,14 +154,57 @@ float* Conv2D::setWeights(int* pos, float* value) {
 		return nullptr;
 	}
 	float* w = new float(weights.getnbEle());
+	atomicSet << <1, weights.getnbEle() >> > (weights.getDevData(), *pos, *value);
 
-	cudaError_t err = cudaMemcpy(w, weights.getData(), weights.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	cudaError_t err=cudaMemcpy(weights.getData(), weights.getDevData(), weights.getnbEle() * sizeof(float), cudaMemcpyDeviceToHost);
+
+	atomicSet << <1, weights.getnbEle() >> > (weights.getData(), *pos, *value);
+	return weights.getData();
+}
+
+
+float* Conv2D::setWeights(float* newWeights) {
+	cudaError_t err = cudaMemcpy(weights.getData(), newWeights, weights.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
 	if (err != cudaSuccess) {
 		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
 		return nullptr;
 	}
-	
+	err = cudaMemcpy(weights.getDevData(), newWeights, weights.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
+		return nullptr;
+	}
+	return weights.getData();
 }
+
+float* Conv2D::setBias(float* newBias) {
+	cudaError_t err = cudaMemcpy(bias.getData(), newBias, bias.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
+		return nullptr;
+	}
+	err = cudaMemcpy(bias.getDevData(), newBias, bias.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
+		return nullptr;
+	}
+	return bias.getData();
+}
+
+float* Conv2D::setBias(int* pos, float* value) {
+	// Implementation for setting a specific bias
+	if (sizeof(value) / sizeof(float) != sizeof(pos)) {
+		return nullptr;
+	}
+	float* b = new float(bias.getnbEle());
+	atomicSet << <1, bias.getnbEle() >> > (bias.getDevData(), *pos, *value);
+
+	cudaError_t err = cudaMemcpy(bias.getData(), bias.getDevData(), bias.getnbEle() * sizeof(float), cudaMemcpyDeviceToHost);
+
+	atomicSet << <1, bias.getnbEle() >> > (bias.getData(), *pos, *value);
+	return bias.getData();
+}
+
 
 float* Conv2D::getBias() {
 	return bias.getData();

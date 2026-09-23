@@ -40,6 +40,9 @@ public:
 	float* setWeights(float* newWeights);
 	float* setWeights(int* pos, float* newWeight);
 
+	float* setBias(float* newBias);
+	float* setBias(int* pos, float* newBias);
+
 	float* getBias();
 
 	float* getDevWeights();
