@@ -130,8 +130,32 @@ float* Conv2D::getWeights() {
 }
 
 float* Conv2D::setWeights(float* newWeights) {
-	cudaMemcpy(weights.getData(), newWeights, weights.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	cudaError_t err=cudaMemcpy(weights.getData(), newWeights, weights.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
+		return nullptr;
+	}
+	err=cudaMemcpy(weights.getDevData(), newWeights, weights.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
+		return nullptr;
+	}
 	return weights.getData();
+}
+
+float* Conv2D::setWeights(int* pos, float* value) {
+	// Implementation for setting a specific weight
+	if (sizeof(value)/sizeof(float) != sizeof(pos)) {
+		return nullptr;
+	}
+	float* w = new float(weights.getnbEle());
+
+	cudaError_t err = cudaMemcpy(w, weights.getData(), weights.getnbEle() * sizeof(float), cudaMemcpyHostToDevice);
+	if (err != cudaSuccess) {
+		std::cerr << "cudaMemcpy failed for host to device copy: " << cudaGetErrorString(err) << std::endl;
+		return nullptr;
+	}
+	
 }
 
 float* Conv2D::getBias() {

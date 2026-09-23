@@ -38,7 +38,7 @@ public:
 	float* getWeights();
 
 	float* setWeights(float* newWeights);
-	float* setWeights(int* pos, float newWeight);
+	float* setWeights(int* pos, float* newWeight);
 
 	float* getBias();
 

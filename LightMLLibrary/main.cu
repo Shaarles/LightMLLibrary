@@ -18,6 +18,6 @@ int main() {
 	conv.forward(a, 1, 3, 3, output); 
 
 	output.toString(); // Print the output tensor
-
+	conv.getWeights(); // Get the weights of the convolutional layer
 	return 0;
 }
